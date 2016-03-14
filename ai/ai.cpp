@@ -85,6 +85,25 @@ void PerformAct(const Action & act) {
 
 Action Analysis(const Information & info)
 {
-	//Put Code here
+	Action ret;
+	ret.playerObjNum = 1; //info.StatusNow->objects_number;
+	for (int i = 0; i < ret.playerObjNum; i++)
+		for (int j = 0; j < kSkillTypes; j++)
+			ret.skill_upgrade[i][j].toUpgradeSkill = false;
+	for (int i = 0; i < ret.playerObjNum; i++)
+		for (int j = 0; j < kSkillTypes; j++)
+			ret.skill_usage[i][j].toUseSkill = false;
+	double shortest_dist = Distance(info.StatusNow->objects[0].pos, info.MapNow->objects[0].pos);;
+	int shortest_index = 0;
+	for (int i = 0; i < info.MapNow->objects_number; i++)
+	{
+		double dist_now = Distance(info.StatusNow->objects[0].pos, info.MapNow->objects[i].pos);
+		if((info.MapNow->objects[i].type != BOSS) && dist_now < shortest_dist) {
+			shortest_dist = dist_now;
+			shortest_index = i;
+		}
+	}
+	ret.movement[0].speed = Displacement(info.StatusNow->objects[0].pos, info.MapNow->objects[shortest_index].pos);
+	ret.movement[0].UserID = info.StatusNow->objects[0].id;
 	return Action();
 }
