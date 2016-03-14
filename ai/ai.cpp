@@ -1,5 +1,5 @@
 ﻿#include "teamstyle17.h"
-#include<stdlib.h>
+#include <stdlib.h>
 
 
 struct UpgradeUsage {
@@ -19,19 +19,20 @@ struct MoveUsage {
 };	//Usage of Move: Speed to move, the object ID to move
 
 struct Action {
-	UpgradeUsage skill_upgrade[kSkillTypes];
-	SkillUsage skill_usage[kSkillTypes];
-	MoveUsage movement;
+	int playerObjNum;
+	UpgradeUsage skill_upgrade[kMaxPlayerObjectNumber][kSkillTypes];
+	SkillUsage skill_usage[kMaxPlayerObjectNumber][kSkillTypes];
+	MoveUsage movement[kMaxPlayerObjectNumber];
 };
 
-void PerformAct(const Action& act);
+void PerformAct(const Action & act);
 
 struct Information {
 	const Map* MapNow;
 	const Status* StatusNow;
 };
 
-Action Analysis(const Information& info);	//To analyse the given information and return the action to perform
+Action Analysis(const Information & info);	//To analyse the given information and return the action to perform
 
 
 void AIMain() {
@@ -41,40 +42,49 @@ void AIMain() {
 	PerformAct(Analysis(info));
 }
 
-void PerformAct(const Action& act) {
-
+void PerformAct(const Action & act) {
 	//Upgrade Skills
-	for (size_t i = 0; i < kSkillTypes; i++) {
-		if (act.skill_upgrade[i].toUpgradeSkill) {
-			UpgradeSkill(act.skill_upgrade[i].UserID, (SkillType)i);
-		}
-	}
-	
-	//Use skills
-	for (size_t i = 0; i < kSkillTypes; i++) {
-		if (act.skill_usage[i].toUseSkill) {
-			switch ((SkillType)i) {
-			case LONG_ATTACK:
-				LongAttack(act.skill_usage[i].UserID, act.skill_usage[i].TargetID);
-				break;
-			case SHORT_ATTACK:
-				ShortAttack(act.skill_usage[i].UserID);
-				break;
-			case SHIELD:
-				Shield(act.skill_usage[i].UserID);
-				break;
-			case DASH:
-				Dash(act.skill_usage[i].UserID);
-				break;
-			case HEALTH_UP:
-				HealthUp(act.skill_usage[i].UserID);
-				break;
-			default:
-				break;
+	for (size_t i = 0; i < act.playerObjNum; i++) {
+		for (size_t j = 0; j < kSkillTypes; j++) {
+			if (act.skill_upgrade[i][j].toUpgradeSkill) {
+				UpgradeSkill(act.skill_upgrade[i][j].UserID, (SkillType)i);
 			}
 		}
 	}
-
+	//Use Skills
+	for (size_t i = 0; i < act.playerObjNum; i++) {
+		for (size_t j = 0; j < kSkillTypes; j++) {
+			if (act.skill_usage[i][j].toUseSkill) {
+				switch ((SkillType)i) {
+				case LONG_ATTACK:
+					LongAttack(act.skill_usage[i][j].UserID, act.skill_usage[i][j].TargetID);
+					break;
+				case SHORT_ATTACK:
+					ShortAttack(act.skill_usage[i][j].UserID);
+					break;
+				case SHIELD:
+					Shield(act.skill_usage[i][j].UserID);
+					break;
+				case DASH:
+					Dash(act.skill_usage[i][j].UserID);
+					break;
+				case HEALTH_UP:
+					HealthUp(act.skill_usage[i][j].UserID);
+					break;
+				default:
+					break;
+				}
+			}
+		}
+	}
 	//Move
-	Move(act.movement.UserID, act.movement.speed);
+	for (size_t i = 0; i < act.playerObjNum; i++) {
+		Move(act.movement[i].UserID, act.movement[i].speed);
+	}
+}
+
+Action Analysis(const Information & info)
+{
+	//Put Code here
+	return Action();
 }
