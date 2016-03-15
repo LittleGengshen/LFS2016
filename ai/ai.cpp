@@ -1,18 +1,21 @@
 ﻿#include "teamstyle17.h"
 #include "our_type.h"
 #include "actlib.h"
-//#include <iostream>
-
+// Debug code begin
+//#include <fstream>
+//std::ofstream fileout;
+// Debug code end
 
 void AIMain() {
 	Information info;
 	info.MapNow = GetMap();
 	info.StatusNow = GetStatus();
+
 	PerformAction(Analysis(info));
 }
 
 void PerformAction(const Action & act) {
-	//Upgrade Skills
+	// Upgrade Skills
 	for (int i = 0; i < act.playerObjNum; i++) {
 		for (int j = 0; j < kSkillTypes; j++) {
 			if (act.skill_upgrade[i][j].toUpgradeSkill) {
@@ -20,7 +23,7 @@ void PerformAction(const Action & act) {
 			}
 		}
 	}
-	//Use Skills
+	// Use Skills
 	for (int i = 0; i < act.playerObjNum; i++) {
 		for (int j = 0; j < kSkillTypes; j++) {
 			if (act.skill_usage[i][j].toUseSkill) {
@@ -46,7 +49,7 @@ void PerformAction(const Action & act) {
 			}
 		}
 	}
-	//Move
+	// Move
 	for (int i = 0; i < act.playerObjNum; i++) {
 		Move(act.movement[i].UserID, act.movement[i].speed);
 	}
@@ -55,8 +58,8 @@ void PerformAction(const Action & act) {
 Action Analysis(const Information & info)
 {
 	Action ret;
-	ret.playerObjNum = 1;//info.StatusNow->objects_number;
-	//Initialize
+	ret.playerObjNum = 1;	//info.StatusNow->objects_number;
+	// Initialize
 	for (int i = 0; i < ret.playerObjNum; i++) {
 		for (int j = 0; j < kSkillTypes; j++) {
 			ret.skill_upgrade[i][j].toUpgradeSkill = false;
@@ -69,5 +72,15 @@ Action Analysis(const Information & info)
 		info.MapNow->objects_number,
 		ret.movement[0]
 		);
+	ModifySpeedNorm(ret.movement[0].speed);
+	ReflectUponBoundary(info.StatusNow->objects[0], ret.movement[0].speed);
+	// Debug code begin
+	//fileout.open("data.txt", std::ios::app);
+	//fileout << "AI " << info.StatusNow->team_id << std::endl;
+	//fileout << "X: " << ret.movement[0].speed.x << std::endl;
+	//fileout << "Y: " << ret.movement[0].speed.y << std::endl;
+	//fileout << "Z: " << ret.movement[0].speed.z << std::endl;
+	//fileout.close();
+	// Debug code end
 	return ret;
 }

@@ -9,6 +9,13 @@
 
 #include "teamstyle17.h"
 
+// Axis in map coordinate.
+namespace Axis {
+	enum name {
+		X, Y, Z, kAxisNum
+	};
+}
+
 struct UpgradeUsage {
 	bool toUpgradeSkill;	// Whether to upgrade the skill or not
 	int UserID;

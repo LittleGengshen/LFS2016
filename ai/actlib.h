@@ -14,19 +14,26 @@
 // To judge whether a object is "friendly", i.e, is of type ENERGY or ADVANCED_ENERGY
 bool isFriendlyObjType(const Object & obj);
 
+// To judge whether a object is on boundary of the map.
+bool OnBoundary(const Object & playerObj, Axis::name axis);
+
 // Move towards the closest friendly object.
 // If no such object exists, move towards the center of the map.
-// Not completed yet.
 void MoveToClosest(
 	const PlayerObject& playerObj,
 	const Object*		ObjInMap,
 	const int			ObjNumInMap,
-	MoveUsage&			MovementToSet
+	MoveUsage&			MovementToSet,
+	const double		MaxSpeed = kMaxMoveSpeed
 	);
 
-// Modify the norm of speed to a given value, while keeping its direction.
-// Move towards the center of the map if the given speed vector = 0.
-// Not completed yet.
-void ModifySpeedNorm(Speed& speed, const double speedNorm);
+// Modify the norm of speed to a given value(default Max Speed), while keeping its direction.
+// Move along X axis positively with the given speed norm if the given speed vector = 0.
+void ModifySpeedNorm(Speed& speed, const double speedNorm = kMaxMoveSpeed);
+
+void ReverseSpeedAlongAxis(Speed& speed, Axis::name axis);
+
+// Reflect the speed upon meeting the boundary of the map.
+void ReflectUponBoundary(const PlayerObject& playObj, Speed& speed);
 
 #endif // !ACTLIB_H
