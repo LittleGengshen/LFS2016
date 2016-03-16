@@ -14,12 +14,13 @@
 
 
 bool isFriendlyObjType(const Object & obj) {
-	return (obj.type != PLAYER) && (obj.type != DEVOUR) && (obj.type != BOSS);
+	return (obj.type == ENERGY) || (obj.type == ADVANCED_ENERGY);
 }
 
-bool OnBoundary(const PlayerObject & playerObj, Axis::name axis)
+bool isOnBoundary(const PlayerObject& playerObj, Axis::name axis)
 {	
 	double delta1, delta2;
+	const double tolerance = 3 * kMaxMoveSpeed;	// Min distance to be judged as being on boundary
 	switch (axis) {
 	case Axis::X :
 		delta1 = playerObj.pos.x - playerObj.radius;
@@ -38,7 +39,11 @@ bool OnBoundary(const PlayerObject & playerObj, Axis::name axis)
 		delta2 = MAX_DISTANCE;
 		break;
 	}
-	return (delta1 < 2 * kMaxMoveSpeed) || (delta2 < 2 * kMaxMoveSpeed);
+	return (delta1 < tolerance) || (delta2 < tolerance);
+}
+
+double ObjDistWeight(const Object & obj) {
+	return 1.;
 }
 
 void MoveToClosest(
@@ -54,7 +59,7 @@ void MoveToClosest(
 	MovementToSet.UserID = playerObj.id;
 
 	for (int i = 0; i < ObjNumInMap; i++) {
-		double dist_now = Distance(playerObj.pos, ObjInMap[i].pos);
+		double dist_now = ObjDistWeight(ObjInMap[i])*Distance(playerObj.pos, ObjInMap[i].pos);
 		if (isFriendlyObjType(ObjInMap[i])) {
 			if (dist_now < shortest_dist) {
 				shortest_index = i;
@@ -62,7 +67,7 @@ void MoveToClosest(
 					break;
 				}
 				shortest_dist = dist_now;
-		}
+			}
 		}
 	}
 	if (-1 != shortest_index) {
@@ -105,7 +110,7 @@ void ReverseSpeedAlongAxis(Speed& speed, Axis::name axis) {
 
 void ReflectUponBoundary(const PlayerObject& playerObj, Speed& speed) {
 	for (size_t i = 0; i < Axis::kAxisNum; i++) {
-		if (OnBoundary(playerObj, (Axis::name)i)) {
+		if (isOnBoundary(playerObj, (Axis::name)i)) {
 			ReverseSpeedAlongAxis(speed, (Axis::name)i);
 		}
 	}

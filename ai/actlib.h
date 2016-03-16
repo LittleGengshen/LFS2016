@@ -15,9 +15,13 @@
 bool isFriendlyObjType(const Object & obj);
 
 // To judge whether a object is on boundary of the map.
-bool OnBoundary(const Object & playerObj, Axis::name axis);
+bool isOnBoundary(const PlayerObject& playerObj, Axis::name axis);
 
-// Move towards the closest friendly object.
+// Return the weight of a object, according to its postion and type,
+//	which is to be multiplied with the distance to player.
+double ObjDistWeight(const Object & obj);
+
+// Move towards the closest(in weighted distance) friendly object.
 // If no such object exists, move towards the center of the map.
 void MoveToClosest(
 	const PlayerObject& playerObj,
