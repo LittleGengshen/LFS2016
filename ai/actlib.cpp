@@ -42,40 +42,75 @@ bool isOnBoundary(const PlayerObject& playerObj, Axis::name axis)
 	return (delta1 < tolerance) || (delta2 < tolerance);
 }
 
-double ObjDistWeight(const Object & obj) {
+/*double ObjDistWeight(const Object & obj) {
 	return 1.;
-}
+}*/
 
-void MoveToClosest(
+const Position ClosestObj(
 	const PlayerObject& playerObj,
 	const Object*		ObjInMap,
 	const int			ObjNumInMap,
-	MoveUsage&			MovementToSet,
+	const phase			NowPhase,
 	const double		MaxSpeed = kMaxMoveSpeed
 	)
 {
 	double shortest_dist = MAX_DISTANCE;
 	int shortest_index = -1;
-	MovementToSet.UserID = playerObj.id;
-
-	for (int i = 0; i < ObjNumInMap; i++) {
-		double dist_now = ObjDistWeight(ObjInMap[i])*Distance(playerObj.pos, ObjInMap[i].pos);
-		if (isFriendlyObjType(ObjInMap[i])) {
-			if (dist_now < shortest_dist) {
-				shortest_index = i;
-				if (dist_now < MaxSpeed) {
-					break;
+	
+	if (NowPhase == EARLY) {
+		const double oneStepDist = MaxSpeed + playerObj.radius;
+		for (int i = 0; i < ObjNumInMap; i++) {
+			if (ObjInMap[i].type == ADVANCED_ENERGY) {
+				double dist_now = Distance(playerObj.pos, ObjInMap[i].pos);
+				if (dist_now < shortest_dist) {
+					shortest_index = i;
+					if (dist_now < oneStepDist) {
+						break;
+					}
+					shortest_dist = dist_now;
 				}
-				shortest_dist = dist_now;
 			}
 		}
 	}
 	if (-1 != shortest_index) {
-		MovementToSet.speed = Displacement(playerObj.pos, ObjInMap[shortest_index].pos);
+		return ObjInMap[shortest_index].pos;
 	}
 	else {
-		Position middle = { kMapSize / 2,kMapSize / 2,kMapSize / 2 };
-		MovementToSet.speed = Displacement(playerObj.pos, middle);
+		int weight[8] = { 0 };
+		Position centroid[8] = { 0 };
+		Position displacementNow;
+		for (int i = 0; i < ObjNumInMap; i++) {
+			int j = 0;
+			if (isFriendlyObjType(ObjInMap[i])) {
+				displacementNow = Displacement(playerObj.pos, ObjInMap[i].pos);
+				if (displacementNow.x >= 0) {
+					j |= 1;
+				}
+				if (displacementNow.y >= 0) {
+					j |= 2;
+				}
+				if (displacementNow.z >= 0) {
+					j |= 4;
+				}
+				weight[j]++;
+				centroid[j] = Displacement(Scale(-1, ObjInMap[i].pos), centroid[j]);
+			}
+		}
+		double max_weight = weight[0];
+		int max_weight_index = 0;
+		for (int i = 1; i < 8; i++) {
+			if (weight[i] > max_weight) {
+				max_weight_index = i;
+				max_weight = weight[i];
+			}
+		}
+		//Position delta[8] = {
+		//	{-1,-1,-1},
+		//	{1,-1,-1},
+		//	{-1,1,-1},
+		//	{}
+		//}
+		return Scale((double)1 / weight[max_weight_index], centroid[max_weight_index]);
 	}
 }
 
@@ -109,7 +144,7 @@ void ReverseSpeedAlongAxis(Speed& speed, Axis::name axis) {
 }
 
 void ReflectUponBoundary(const PlayerObject& playerObj, Speed& speed) {
-	for (size_t i = 0; i < Axis::kAxisNum; i++) {
+	for (int i = 0; i < Axis::kAxisNum; i++) {
 		if (isOnBoundary(playerObj, (Axis::name)i)) {
 			ReverseSpeedAlongAxis(speed, (Axis::name)i);
 		}

@@ -19,15 +19,15 @@ bool isOnBoundary(const PlayerObject& playerObj, Axis::name axis);
 
 // Return the weight of a object, according to its postion and type,
 //	which is to be multiplied with the distance to player.
-double ObjDistWeight(const Object & obj);
+//double ObjDistWeight(const Object & obj);
 
-// Move towards the closest(in weighted distance) friendly object.
+// The closest "good type" object.
 // If no such object exists, move towards the center of the map.
-void MoveToClosest(
+const Position ClosestObj(
 	const PlayerObject& playerObj,
 	const Object*		ObjInMap,
 	const int			ObjNumInMap,
-	MoveUsage&			MovementToSet,
+	const phase			NowPhase,
 	const double		MaxSpeed = kMaxMoveSpeed
 	);
 

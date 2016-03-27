@@ -6,6 +6,10 @@
 //std::ofstream fileout;
 // Debug code end
 
+Position BossPos;
+Position nowDest;
+bool nowDestReached = true;
+
 void AIMain() {
 	Information info;
 	info.MapNow = GetMap();
@@ -58,7 +62,7 @@ void PerformAction(const Action & act) {
 Action Analysis(const Information & info)
 {
 	Action ret;
-	ret.playerObjNum = 1;	//info.StatusNow->objects_number;
+	ret.playerObjNum = 1;	//info.StatusNow->objects_number
 	// Initialize
 	for (int i = 0; i < ret.playerObjNum; i++) {
 		for (int j = 0; j < kSkillTypes; j++) {
@@ -66,14 +70,26 @@ Action Analysis(const Information & info)
 			ret.skill_usage[i][j].toUseSkill = false;
 		}
 	}
-	MoveToClosest(
-		info.StatusNow->objects[0],
-		info.MapNow->objects,
-		info.MapNow->objects_number,
-		ret.movement[0]
-		);
+	Position closest;
+	if (nowDestReached) {
+		closest =
+			ClosestObj(
+				info.StatusNow->objects[0],
+				info.MapNow->objects,
+				info.MapNow->objects_number,
+				info.MapNow->time < 1000 ? EARLY : LATE
+				);
+	}
+	else {
+		closest = nowDest;
+	}
+	if (Distance(info.StatusNow->objects[0].pos, closest) < kMaxMoveSpeed + info.StatusNow->objects[0].radius) {
+		nowDestReached = true;
+	}
+	ret.movement[0].UserID = info.StatusNow->objects[0].id;
+	ret.movement[0].speed = Displacement(info.StatusNow->objects[0].pos, closest);
 	ModifySpeedNorm(ret.movement[0].speed);
-	ReflectUponBoundary(info.StatusNow->objects[0], ret.movement[0].speed);
+	//ReflectUponBoundary(info.StatusNow->objects[0], ret.movement[0].speed);
 	// Debug code begin
 	//fileout.open("data.txt", std::ios::app);
 	//fileout << "AI " << info.StatusNow->team_id << std::endl;

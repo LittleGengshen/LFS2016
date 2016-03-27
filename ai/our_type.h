@@ -41,12 +41,19 @@ struct Action {
 };
 void PerformAction(const Action & act);
 
+
 // Information detected, which is passed to analyse
 struct Information {
 	const Map* MapNow;
 	const Status* StatusNow;
 };
 Action Analysis(const Information & info);	// Return the action to perform
+
+
+// Grocery
+enum phase {
+	EARLY, LATE
+};
 
 #endif // !OUR_TYPE_H
 
