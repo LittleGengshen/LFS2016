@@ -47,3 +47,8 @@ void ReverseSpeedAlongAxis(Speed& speed, Axis::name axis);
 void ReflectUponBoundary(const PlayerObject& playObj, Speed& speed);
 
 #endif // !ACTLIB_H
+
+
+void Evolution();
+Position JudgeDirection(const Position & pos);
+void Attack();
