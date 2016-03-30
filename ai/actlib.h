@@ -49,6 +49,6 @@ void ReflectUponBoundary(const PlayerObject& playObj, Speed& speed);
 #endif // !ACTLIB_H
 
 
-void Evolution();
+void Evolution(Action & ret);
 Position JudgeDirection(const Position & pos);
-void Attack();
+void Attack(Action & ret);

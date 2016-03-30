@@ -76,8 +76,6 @@ Action Analysis(void)
 		closest =
 			ClosestObj(
 				info->StatusNow->objects[0],
-				info->MapNow->objects,
-				info->MapNow->objects_number,
 				info->MapNow->time < 1000 ? EARLY : LATE
 				);
 	}
@@ -90,6 +88,8 @@ Action Analysis(void)
 	ret.movement[0].UserID = info->StatusNow->objects[0].id;
 	ret.movement[0].speed = Displacement(info->StatusNow->objects[0].pos, closest);
 	ModifySpeedNorm(ret.movement[0].speed);
+	Evolution(ret);
+	Attack(ret);
 	//ReflectUponBoundary(info->StatusNow->objects[0], ret.movement[0].speed);
 	// Debug code begin
 	//fileout.open("data.txt", std::ios::app);
