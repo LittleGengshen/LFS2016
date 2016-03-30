@@ -48,14 +48,14 @@ bool isOnBoundary(const PlayerObject& playerObj, Axis::name axis)
 
 const Position ClosestObj(
 	const PlayerObject& playerObj,
-	const Object*		ObjInMap,
-	const int			ObjNumInMap,
 	const phase			NowPhase,
 	const double		MaxSpeed = kMaxMoveSpeed
 	)
 {
 	double shortest_dist = MAX_DISTANCE;
 	int shortest_index = -1;
+	const int ObjNumInMap = info->MapNow->objects_number;
+	const Object* ObjInMap = info->MapNow->objects;
 	
 	if (NowPhase == EARLY) {
 		const double oneStepDist = MaxSpeed + playerObj.radius;
@@ -104,14 +104,35 @@ const Position ClosestObj(
 				max_weight = weight[i];
 			}
 		}
-		//Position delta[8] = {
-		//	{-1,-1,-1},
-		//	{1,-1,-1},
-		//	{-1,1,-1},
-		//	{}
-		//}
 		return Scale((double)1 / weight[max_weight_index], centroid[max_weight_index]);
 	}
+}
+
+bool Shake(
+	Speed&				speed,
+	const PlayerObject& playerObj,
+	const double		MaxSpeed = kMaxMoveSpeed
+	)
+{
+	const int ObjNumInMap = info->MapNow->objects_number;
+	const Object* ObjInMap = info->MapNow->objects;
+	const double oneStepDist = MaxSpeed + playerObj.radius;
+
+	int i;
+	for (i = 0; i < ObjNumInMap; i++) {
+		if (isFriendlyObjType(ObjInMap[i])) {
+			double dist_now = Distance(playerObj.pos, ObjInMap[i].pos);
+			if (dist_now < oneStepDist) {
+					break;
+			}
+		}
+	}
+	if (i < ObjNumInMap) {
+		speed = Displacement(playerObj.pos, ObjInMap[i].pos);
+		return true;
+	}
+
+	return false;
 }
 
 void ModifySpeedNorm(Speed& speed, const double speedNorm = kMaxMoveSpeed)

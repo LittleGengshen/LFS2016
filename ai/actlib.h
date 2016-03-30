@@ -25,11 +25,17 @@ bool isOnBoundary(const PlayerObject& playerObj, Axis::name axis);
 // If no such object exists, move towards the center of the map.
 const Position ClosestObj(
 	const PlayerObject& playerObj,
-	const Object*		ObjInMap,
-	const int			ObjNumInMap,
 	const phase			NowPhase,
 	const double		MaxSpeed = kMaxMoveSpeed
 	);
+
+
+bool Shake(
+	Speed&				speed,
+	const PlayerObject& playerObj,
+	const double		MaxSpeed = kMaxMoveSpeed
+	);
+
 
 // Modify the norm of speed to a given value(default Max Speed), while keeping its direction.
 // Move along X axis positively with the given speed norm if the given speed vector = 0.

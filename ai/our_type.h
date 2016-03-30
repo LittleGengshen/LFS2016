@@ -47,7 +47,8 @@ struct Information {
 	const Map* MapNow;
 	const Status* StatusNow;
 };
-Action Analysis(const Information & info);	// Return the action to perform
+Information* info;	// Global variable storing the map information
+Action Analysis(void);	// Return the action to perform
 
 
 // Grocery
