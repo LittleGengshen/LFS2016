@@ -48,6 +48,10 @@ struct Information {
 	const Status* StatusNow;
 };
 Information* info;	// Global variable storing the map information
+
+int DangerJudgement; // The value of the variable represents if current situation is in danger.
+					// Which is 0 or 1;
+
 Action Analysis(void);	// Return the action to perform
 
 

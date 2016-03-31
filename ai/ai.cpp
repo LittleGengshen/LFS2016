@@ -85,9 +85,20 @@ Action Analysis(void)
 	if (Distance(info->StatusNow->objects[0].pos, closest) < kMaxMoveSpeed + info->StatusNow->objects[0].radius) {
 		nowDestReached = true;
 	}
+
+	closest = JudgeDirection(closest);
+
+	if (!DangerJudgement) closest = shake(closest); //gy:shake需要改!!!!!!!!!!!!
+	
+	//gy:执行移动前最后执行shake 覆盖closest
+	//gy:shake时避免卡死
+
+
 	ret.movement[0].UserID = info->StatusNow->objects[0].id;
 	ret.movement[0].speed = Displacement(info->StatusNow->objects[0].pos, closest);
 	ModifySpeedNorm(ret.movement[0].speed);
+
+
 	Evolution(ret);
 	Attack(ret);
 	//ReflectUponBoundary(info->StatusNow->objects[0], ret.movement[0].speed);
