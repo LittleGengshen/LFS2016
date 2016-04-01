@@ -135,6 +135,31 @@ bool Shake(
 	return false;
 }
 
+void ByPass(Speed& speed, const PlayerObject& playerObj)
+{
+	size_t cntDevour = 0;
+	Position hereToDevour[3];
+	Position hereToDest = Displacement(playerObj.pos, nowDest);
+	for (size_t i = 0; i < info->MapNow->objects_number; i++) {
+		if (info->MapNow->objects[i].type == DEVOUR) {
+			hereToDevour[i] = Displacement(playerObj.pos, info->MapNow->objects[i].pos);
+			cntDevour++;
+			if (cntDevour >= 3) { 
+				break;
+			}
+		}
+	}
+	if (cntDevour == 1) {
+		speed = CrossProduct(CrossProduct(hereToDest, hereToDevour[0]), hereToDevour[0]);
+	}
+	if (cntDevour == 2) {
+		speed = CrossProduct(hereToDevour[0], hereToDevour[1]);
+	}
+	if (cntDevour == 3) {
+		speed = CrossProduct(Displacement(hereToDevour[0], hereToDevour[1]), Displacement(hereToDevour[0], hereToDevour[2]));
+	}
+}
+
 void ModifySpeedNorm(Speed& speed, const double speedNorm = kMaxMoveSpeed)
 {
 	double NormNow = Norm(speed);
