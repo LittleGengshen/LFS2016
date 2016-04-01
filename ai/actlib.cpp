@@ -47,16 +47,16 @@ bool isOnBoundary(const PlayerObject& playerObj, Axis::name axis)
 }*/
 
 const Position ClosestObj(
-	const PlayerObject& playerObj,
-	const phase			NowPhase,
-	const double		MaxSpeed = kMaxMoveSpeed
-	)
+const PlayerObject& playerObj,
+const phase			NowPhase,
+const double		MaxSpeed = kMaxMoveSpeed
+)
 {
 	double shortest_dist = MAX_DISTANCE;
 	int shortest_index = -1;
 	const int ObjNumInMap = info->MapNow->objects_number;
 	const Object* ObjInMap = info->MapNow->objects;
-	
+
 	if (NowPhase == EARLY) {
 		const double oneStepDist = MaxSpeed + playerObj.radius;
 		for (int i = 0; i < ObjNumInMap; i++) {
@@ -123,7 +123,7 @@ bool Shake(
 		if (isFriendlyObjType(ObjInMap[i])) {
 			double dist_now = Distance(playerObj.pos, ObjInMap[i].pos);
 			if (dist_now < oneStepDist) {
-					break;
+				break;
 			}
 		}
 	}
@@ -135,15 +135,21 @@ bool Shake(
 	return false;
 }
 
-void ByPass(Speed& speed, const PlayerObject& playerObj)
+void ByPass(
+	Speed&				speed,
+	const PlayerObject& playerObj,
+	const double		MaxSpeed = kMaxMoveSpeed)
 {
 	size_t cntDevour = 0;
 	Position hereToDevour[3];
 	Position hereToDest = Displacement(playerObj.pos, nowDest);
+	const double oneStepDist = MaxSpeed + playerObj.radius;
 	for (size_t i = 0; i < info->MapNow->objects_number; i++) {
 		if (info->MapNow->objects[i].type == DEVOUR) {
-			hereToDevour[i] = Displacement(playerObj.pos, info->MapNow->objects[i].pos);
-			cntDevour++;
+			hereToDevour[cntDevour] = Displacement(playerObj.pos, info->MapNow->objects[i].pos);
+			if (Norm(hereToDevour[i]) < oneStepDist) {
+				cntDevour++;
+			}
 			if (cntDevour >= 3) { 
 				break;
 			}
