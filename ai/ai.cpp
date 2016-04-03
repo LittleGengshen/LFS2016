@@ -1,18 +1,25 @@
 ﻿#include "teamstyle17.h"
 #include "our_type.h"
 #include "actlib.h"
+#include <cstdlib>
+#include <ctime>
 // Debug code begin
 //#include <fstream>
 //std::ofstream fileout;
 // Debug code end
 
-Information* info;
+Information GlobalInfo;
 
-Position BossPos;
+Information* info = &GlobalInfo;
+Position BossPos = { 10000,10000,10000 };
 Position nowDest;
+
 bool nowDestReached = true;
+size_t notReachedTime = 0;
+
 
 void AIMain() {
+	srand((unsigned)time(NULL));
 	info->MapNow = GetMap();
 	info->StatusNow = GetStatus();
 
@@ -24,7 +31,7 @@ void PerformAction(const Action & act) {
 	for (int i = 0; i < act.playerObjNum; i++) {
 		for (int j = 0; j < kSkillTypes; j++) {
 			if (act.skill_upgrade[i][j].toUpgradeSkill) {
-				UpgradeSkill(act.skill_upgrade[i][j].UserID, (SkillType)i);
+				UpgradeSkill(act.skill_upgrade[i][j].UserID, (SkillType)j);
 			}
 		}
 	}
@@ -32,7 +39,7 @@ void PerformAction(const Action & act) {
 	for (int i = 0; i < act.playerObjNum; i++) {
 		for (int j = 0; j < kSkillTypes; j++) {
 			if (act.skill_usage[i][j].toUseSkill) {
-				switch ((SkillType)i) {
+				switch ((SkillType)j) {
 				case LONG_ATTACK:
 					LongAttack(act.skill_usage[i][j].UserID, act.skill_usage[i][j].TargetID);
 					break;
@@ -71,44 +78,53 @@ Action Analysis(void)
 			ret.skill_usage[i][j].toUseSkill = false;
 		}
 	}
-	Position closest;
-	if (nowDestReached) {
-		closest =
+	Position nowMovingToPos;
+	if (notReachedTime > 150) {
+		do {
+			nowDest = { double(rand() % kMapSize),double(rand() % kMapSize),double(rand() % kMapSize) };
+		} while (Distance(nowDest, BossPos) < 2500);
+		nowDestReached = false;
+		notReachedTime = 0;
+	}
+	else if (nowDestReached) {
+		nowDest =
 			ClosestObj(
 				info->StatusNow->objects[0],
-				info->MapNow->time < 1000 ? EARLY : LATE
+				info->MapNow->time < 1750 ? EARLY : LATE
 				);
+		nowDestReached = false;
+		notReachedTime = 0;
 	}
 	else {
-		closest = nowDest;
+		notReachedTime++;
 	}
-	if (Distance(info->StatusNow->objects[0].pos, closest) < kMaxMoveSpeed + info->StatusNow->objects[0].radius) {
+
+	if (Distance(info->StatusNow->objects[0].pos, nowDest) < kMaxMoveSpeed + info->StatusNow->objects[0].radius) {
 		nowDestReached = true;
 	}
 
-	closest = JudgeDirection(closest);
+	ret.movement[0].speed = Displacement(info->StatusNow->objects[0].pos, nowDest);
+	nowMovingToPos = JudgeDirection(nowDest);
 
-	if (!DangerJudgement) closest = shake(closest); //gy:shake需要改!!!!!!!!!!!!
-	
-	//gy:执行移动前最后执行shake 覆盖closest
-	//gy:shake时避免卡死
-
-
+	double DashSpeedBonus[kMaxSkillLevel + 1] = {
+		0,20,40,60,80,100
+	};
+	double max_speed = kMaxMoveSpeed;
+	if (info->StatusNow->objects[0].dash_time > 0) {
+		max_speed += DashSpeedBonus[info->StatusNow->objects[0].skill_level[DASH]];
+	}
 	ret.movement[0].UserID = info->StatusNow->objects[0].id;
-	ret.movement[0].speed = Displacement(info->StatusNow->objects[0].pos, closest);
-	ModifySpeedNorm(ret.movement[0].speed);
-
+	if (isInDanger) {
+		ret.movement[0].speed = Displacement(info->StatusNow->objects[0].pos, nowMovingToPos);
+	}
+	else {
+		Shake(ret.movement[0].speed, info->StatusNow->objects[0], max_speed);
+		ByPass(ret.movement[0].speed, info->StatusNow->objects[0], max_speed);
+	}
+	ModifySpeedNorm(ret.movement[0].speed, max_speed);
 
 	Evolution(ret);
 	Attack(ret);
-	//ReflectUponBoundary(info->StatusNow->objects[0], ret.movement[0].speed);
-	// Debug code begin
-	//fileout.open("data.txt", std::ios::app);
-	//fileout << "AI " << info->StatusNow->team_id << std::endl;
-	//fileout << "X: " << ret.movement[0].speed.x << std::endl;
-	//fileout << "Y: " << ret.movement[0].speed.y << std::endl;
-	//fileout << "Z: " << ret.movement[0].speed.z << std::endl;
-	//fileout.close();
-	// Debug code end
+
 	return ret;
 }

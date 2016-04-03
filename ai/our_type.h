@@ -47,11 +47,13 @@ struct Information {
 	const Map* MapNow;
 	const Status* StatusNow;
 };
-Information* info;	// Global variable storing the map information
-Position BossPos;
-Position nowDest;
+extern Information* info;	// Global variable storing the map information
+extern Position BossPos;
+extern Position nowDest;
+extern bool nowDestReached;
+extern size_t notReachedTime;
 
-int DangerJudgement; // The value of the variable represents if current situation is in danger.
+extern bool isInDanger; // The value of the variable represents if current situation is in danger.
 					// Which is 0 or 1;
 
 Action Analysis(void);	// Return the action to perform

@@ -37,18 +37,24 @@ bool Shake(
 	);
 
 
+void ByPass(
+	Speed&				speed,
+	const PlayerObject& playerObj,
+	const double		MaxSpeed = kMaxMoveSpeed);
+
 // Modify the norm of speed to a given value(default Max Speed), while keeping its direction.
 // Move along X axis positively with the given speed norm if the given speed vector = 0.
 void ModifySpeedNorm(Speed& speed, const double speedNorm = kMaxMoveSpeed);
-
+/*
 void ReverseSpeedAlongAxis(Speed& speed, Axis::name axis);
 
 // Reflect the speed upon meeting the boundary of the map.
 void ReflectUponBoundary(const PlayerObject& playObj, Speed& speed);
-
-#endif // !ACTLIB_H
-
+*/
 
 void Evolution(Action & ret);
 Position JudgeDirection(const Position & pos);
 void Attack(Action & ret);
+
+
+#endif // !ACTLIB_H

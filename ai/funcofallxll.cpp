@@ -20,10 +20,37 @@ int myHealth ;
 int otherRealID ;
 Position otherpos ;
 double otherradius;
-int found;
+bool found;
+bool isInDanger = false;
 	
 	
-	
+
+Position Escape(const Position & pos)
+{
+	double enemyDistance = Distance(mypos, otherpos) - myradius - otherradius;
+	if (enemyDistance < DANGER_DISTANCE)
+	{
+		isInDanger = true;
+	}
+
+	Position out;
+	out = Displacement(otherpos, mypos);
+	for (int i = 0; i < objnum; i++)
+	{
+		if (info->MapNow->objects[i].type == ADVANCED_ENERGY)
+		{
+			Position energypos = info->MapNow->objects[i].pos;
+			if (DotProduct(energypos, out) > 0)
+			{
+				return energypos;
+			}
+
+		}
+	}
+
+	return out;
+}
+
 
 
 void Evolution(Action & ret)
@@ -51,17 +78,17 @@ Position JudgeDirection(const Position & pos)
 	myradius = info->StatusNow->objects[0].radius;
 	mypos = info->StatusNow->objects[0].pos;
 	myHealth = info->StatusNow->objects[0].health;
-	found = 0;
+	found = false;
 
 	for (int i = 0; i < objnum; i++)
 	{
-		if (info->MapNow->objects[i].team_id == my01ID^1)
+		if (info->MapNow->objects[i].team_id == (my01ID^1))
 		{
 			otherRealID = info->MapNow->objects[i].id;
 			otherpos = info->MapNow->objects[i].pos;
 			otherradius = info->MapNow->objects[i].radius;
-			DangerJudgement = 0;
-			found = 1;
+			isInDanger = false;
+			found = true;
 		}
 	}
 
@@ -70,7 +97,7 @@ Position JudgeDirection(const Position & pos)
 		double otherhealth = pow(otherradius / 100., 3);
 		if (otherhealth > myHealth * DANDER_HEALTH_RATIO)
 		{
-			return Escape(pos)
+			return Escape(pos);
 		}	
 
 		if (otherhealth * ATTACK_HEALTH_RATIO < myHealth)
@@ -84,33 +111,6 @@ Position JudgeDirection(const Position & pos)
 }
 
 
-
-
-Position Escape(const Position & pos)
-{
-	double enemyDistance = Distance(mypos, otherpos) - myradius - otherradius;
-	if (enemyDistance < DANGER_DISTANCE)
-	{
-		DangerJudgement = 1;
-	}
-
-	Position out;
-	out = Displacement(otherpos, mypos); 
-	for (int i = 0; i < objnum; i++)
-	{
-		if (info->MapNow->objects[i].type == ADVANCED_ENERGY)
-		{
-			Position energypos = info->MapNow->objects[i].pos;
-			if (DotProduct(energypos, out) > 0)
-			{
-				return energypos;
-			}
-
-		}
-	}	
-	
-	return out;
-}
 
 void Attack(Action & ret)
 {
